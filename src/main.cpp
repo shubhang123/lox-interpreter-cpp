@@ -121,6 +121,22 @@ bool tokenize(const std::string& input) {
                     std::cout << "BANG ! null" << std::endl;
                 }
                 break;
+            case '<':
+                if(index + 1 < inputSize && input[index + 1] == '='){
+                    std::cout << "LESS_EQUAL <= null" << std::endl;
+                    index++;
+                }else{
+                    std::cout << "LESS < null" << std::endl;
+                }
+                break;
+            case '>':
+                if(index + 1 < inputSize && input[index + 1] == '='){
+                    std::cout << "GREATER_EQUAL >= null" << std::endl;
+                    index++;
+                }else{
+                    std::cout << "GREATER > null" << std::endl;
+                }
+                break;
             // Ignore common whitespace so it doesn't produce an error.
             // (In later stages, you might handle newlines to track line numbers properly.)
             case ' ':
