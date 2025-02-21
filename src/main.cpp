@@ -108,6 +108,7 @@ bool tokenize(const std::string& input) {
             case '=':
                 if(index + 1 < inputSize && input[index + 1] == '='){
                     std::cout << "EQUAL_EQUAL == null" << std::endl;
+                    index++;
                 }else if(index + 1 < inputSize && !(input[index + 1] == '=')){
                     std::cout << "EQUAL = null" << std::endl;
                 }
