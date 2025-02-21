@@ -102,7 +102,12 @@ bool tokenize(const std::string& input) {
             case ';':
                 std::cout << "SEMICOLON ; null" << std::endl;
                 break;
-
+            case '=':
+                std::cout << "EQUAL = null" << std::endl;
+                break;
+            case '==':
+                std::cout << "EQUAL_EQUAL == null" << std::endl;
+                break;
             // Ignore common whitespace so it doesn't produce an error.
             // (In later stages, you might handle newlines to track line numbers properly.)
             case ' ':
