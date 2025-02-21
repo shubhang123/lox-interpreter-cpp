@@ -82,7 +82,7 @@ void tokenize(const std::string& input) {
                 std::cout << "MINUS - null"<< std::endl;
                 break;
             case ';':
-                std::cout << "SEMI COLON ; null"<< std::endl;
+                std::cout << "SEMICOLON ; null"<< std::endl;
                 break;
             default:
                 break;
