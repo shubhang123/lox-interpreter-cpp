@@ -3,148 +3,139 @@
 #include <sstream>
 #include <string>
 
-// Forward declarations
 std::string readFileContents(const std::string& filename);
 bool tokenize(const std::string& input);
 void printUsageAndExit(const std::string& programName);
+void addToken(const std::string& type, const std::string& lexeme);
 
 int main(int argc, char* argv[]) {
-    // Disable output buffering (std::unitbuf automatically flushes after each insertion)
+    // Disable output buffering.
     std::cout << std::unitbuf;
     std::cerr << std::unitbuf;
 
-    // Debug/log message
     std::cerr << "Logs from your program will appear here!" << std::endl;
 
-    // Basic argument check
     if (argc < 3) {
         printUsageAndExit(argv[0]);
-        return 1;
     }
 
     const std::string command = argv[1];
     const std::string filename = argv[2];
 
-    if (command == "tokenize") {
-        std::string fileContents = readFileContents(filename);
-        
-        // tokenize returns `true` if any errors were encountered
-        bool hadError = tokenize(fileContents);
-
-        // If lexical errors were present, exit with code 65
-        if (hadError) {
-            return 65;
-        }
-    } else {
+    if (command != "tokenize") {
         std::cerr << "Unknown command: " << command << std::endl;
         printUsageAndExit(argv[0]);
-        return 1;
     }
 
-    // If no errors, exit with code 0
-    return 0;
+    std::string fileContents = readFileContents(filename);
+    bool hadError = tokenize(fileContents);
+
+    return hadError ? 65 : 0;
 }
 
-// Reads the entire content of a file into a single string.
 std::string readFileContents(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Error reading file: " << filename << std::endl;
-        std::exit(1);  // Exiting if we can't open the file
+        std::exit(1);
     }
-
     std::stringstream buffer;
     buffer << file.rdbuf();
-    file.close();
     return buffer.str();
 }
 
+// Helper to add tokens.
+void addToken(const std::string& type, const std::string& lexeme) {
+    std::cout << type << " " << lexeme << " null" << std::endl;
+}
+
 /**
- * Tokenize the input string. 
- *
- * Prints valid tokens to stdout and prints errors to stderr in the format:
- *  [line 1] Error: Unexpected character: <character>
+ * Tokenize the input string.
  * 
- * Returns true if any lexical errors were encountered, false otherwise.
+ * This function prints valid tokens to stdout and lexical errors to stderr.
+ * For two-character tokens (like ==, !=, <=, >=), a helper lambda is used.
+ * Returns true if any lexical errors were encountered.
  */
 bool tokenize(const std::string& input) {
     bool hadError = false;
-    int inputSize = input.length();
+    int inputSize = static_cast<int>(input.length());
 
+    // Lambda to check for a two-character operator.
+    auto match = [&](int& index, char expected) -> bool {
+        if (index + 1 < inputSize && input[index + 1] == expected) {
+            index++;  // Consume the next character.
+            return true;
+        }
+        return false;
+    };
 
     for (int index = 0; index < inputSize; index++) {
         char c = input[index];
         switch (c) {
             case '(':
-                std::cout << "LEFT_PAREN ( null" << std::endl;
+                addToken("LEFT_PAREN", "(");
                 break;
             case ')':
-                std::cout << "RIGHT_PAREN ) null" << std::endl;
+                addToken("RIGHT_PAREN", ")");
                 break;
             case '{':
-                std::cout << "LEFT_BRACE { null" << std::endl;
+                addToken("LEFT_BRACE", "{");
                 break;
             case '}':
-                std::cout << "RIGHT_BRACE } null" << std::endl;
+                addToken("RIGHT_BRACE", "}");
                 break;
             case '*':
-                std::cout << "STAR * null" << std::endl;
+                addToken("STAR", "*");
                 break;
             case '.':
-                std::cout << "DOT . null" << std::endl;
+                addToken("DOT", ".");
                 break;
             case '+':
-                std::cout << "PLUS + null" << std::endl;
+                addToken("PLUS", "+");
                 break;
             case ',':
-                std::cout << "COMMA , null" << std::endl;
+                addToken("COMMA", ",");
                 break;
             case '-':
-                std::cout << "MINUS - null" << std::endl;
+                addToken("MINUS", "-");
                 break;
             case ';':
-                std::cout << "SEMICOLON ; null" << std::endl;
+                addToken("SEMICOLON", ";");
                 break;
             case '=':
-                if(index + 1 < inputSize && input[index + 1] == '='){
-                    std::cout << "EQUAL_EQUAL == null" << std::endl;
-                    index++;
-                }else{
-                    std::cout << "EQUAL = null" << std::endl;
+                if (match(index, '=')) {
+                    addToken("EQUAL_EQUAL", "==");
+                } else {
+                    addToken("EQUAL", "=");
                 }
                 break;
             case '!':
-                if(index + 1 < inputSize && input[index + 1] == '='){
-                    std::cout << "BANG_EQUAL != null" << std::endl;
-                    index++;
-                }else{
-                    std::cout << "BANG ! null" << std::endl;
+                if (match(index, '=')) {
+                    addToken("BANG_EQUAL", "!=");
+                } else {
+                    addToken("BANG", "!");
                 }
                 break;
             case '<':
-                if(index + 1 < inputSize && input[index + 1] == '='){
-                    std::cout << "LESS_EQUAL <= null" << std::endl;
-                    index++;
-                }else{
-                    std::cout << "LESS < null" << std::endl;
+                if (match(index, '=')) {
+                    addToken("LESS_EQUAL", "<=");
+                } else {
+                    addToken("LESS", "<");
                 }
                 break;
             case '>':
-                if(index + 1 < inputSize && input[index + 1] == '='){
-                    std::cout << "GREATER_EQUAL >= null" << std::endl;
-                    index++;
-                }else{
-                    std::cout << "GREATER > null" << std::endl;
+                if (match(index, '=')) {
+                    addToken("GREATER_EQUAL", ">=");
+                } else {
+                    addToken("GREATER", ">");
                 }
                 break;
-            // Ignore common whitespace so it doesn't produce an error.
-            // (In later stages, you might handle newlines to track line numbers properly.)
+            // Ignore common whitespace.
             case ' ':
             case '\t':
             case '\r':
             case '\n':
                 break;
-
             default:
                 std::cerr << "[line 1] Error: Unexpected character: " << c << std::endl;
                 hadError = true;
@@ -152,9 +143,8 @@ bool tokenize(const std::string& input) {
         }
     }
 
-    // Finally, print an EOF token
-    std::cout << "EOF  null" << std::endl;
-
+    // Finally, add the EOF token.
+    addToken("EOF", "");
     return hadError;
 }
 
