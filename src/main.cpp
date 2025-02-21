@@ -69,8 +69,11 @@ std::string readFileContents(const std::string& filename) {
  */
 bool tokenize(const std::string& input) {
     bool hadError = false;
+    int inputSize = input.length();
 
-    for (char c : input) {
+
+    for (int index = 0; index < inputSize; index++) {
+        char c = input[index];
         switch (c) {
             case '(':
                 std::cout << "LEFT_PAREN ( null" << std::endl;
@@ -103,10 +106,11 @@ bool tokenize(const std::string& input) {
                 std::cout << "SEMICOLON ; null" << std::endl;
                 break;
             case '=':
-                std::cout << "EQUAL = null" << std::endl;
-                break;
-            case '==':
-                std::cout << "EQUAL_EQUAL == null" << std::endl;
+                if(index + 1 < inputSize && input[index + 1] == '='){
+                    std::cout << "EQUAL_EQUAL == null" << std::endl;
+                }else{
+                    std::cout << "EQUAL = null" << std::endl;
+                }
                 break;
             // Ignore common whitespace so it doesn't produce an error.
             // (In later stages, you might handle newlines to track line numbers properly.)
