@@ -8,9 +8,6 @@ std::string readFileContents(const std::string& filename);
 void tokenize(const std::string& input);
 void printUsageAndExit(const std::string& programName);
 
-/**
- * Entry point of the program.
- */
 int main(int argc, char* argv[]) {
     // Disable output buffering (std::unitbuf automatically flushes after each insertion)
     std::cout << std::unitbuf;
@@ -40,9 +37,7 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-/**
- * Reads the entire content of a file into a single string.
- */
+//Reads the entire content of a file into a single string.
 std::string readFileContents(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -69,7 +64,22 @@ void tokenize(const std::string& input) {
                 std::cout << "LEFT_BRACE { null"<< std::endl;
                 break;
             case '}':
-                std::cout << "RIGHT_BRACE } null"<< std::endl;
+                std::cout << "STAR * null"<< std::endl;
+                break;
+            case '.':
+                std::cout << "DOT . null"<< std::endl;
+                break;
+            case '+':
+                std::cout << "PLUS + null"<< std::endl;
+                break;
+            case ',':
+                std::cout << "COMMA , null"<< std::endl;
+                break;
+            case '-':
+                std::cout << "MINUS - null"<< std::endl;
+                break;
+            case ';':
+                std::cout << "SEMI COLON ; null"<< std::endl;
                 break;
             default:
                 break;
@@ -78,9 +88,7 @@ void tokenize(const std::string& input) {
     std::cout << "EOF  null" << std::endl;
 }
 
-/**
- * Prints usage information and exits the program.
- */
+//Prints usage information and exits the program.
 void printUsageAndExit(const std::string& programName) {
     std::cerr << "Usage: " << programName << " tokenize <filename>" << std::endl;
     std::exit(1);
