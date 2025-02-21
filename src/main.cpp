@@ -130,6 +130,15 @@ bool tokenize(const std::string& input) {
                     addToken("GREATER", ">");
                 }
                 break;
+            case '/':
+                if (match(index, '/')) {
+                    while(input[index+1] != '\n' && index +1 < inputSize){
+                    index++
+                }
+                } else {
+                    addToken("SLASH", "/");
+                }
+                break;
             // Ignore common whitespace.
             case ' ':
             case '\t':
