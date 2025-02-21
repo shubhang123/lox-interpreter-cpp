@@ -113,6 +113,14 @@ bool tokenize(const std::string& input) {
                     std::cout << "EQUAL = null" << std::endl;
                 }
                 break;
+            case '!':
+                if(index + 1 < inputSize && input[index + 1] == '='){
+                    std::cout << "BANG_EQUAL != null" << std::endl;
+                    index++;
+                }else{
+                    std::cout << "BANG ! null" << std::endl;
+                }
+                break;
             // Ignore common whitespace so it doesn't produce an error.
             // (In later stages, you might handle newlines to track line numbers properly.)
             case ' ':
