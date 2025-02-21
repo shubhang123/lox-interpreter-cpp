@@ -71,6 +71,7 @@ bool tokenize(const std::string &input) {
 
   for (int index = 0; index < inputSize; index++) {
     char c = input[index];
+    int N = 1; //error line number
     switch (c) {
     case '(':
       addToken("LEFT_PAREN", "(");
@@ -143,10 +144,10 @@ bool tokenize(const std::string &input) {
     case ' ':
     case '\t':
     case '\r':
-    case '\n':
+    case '\n': N++;
       break;
     default:
-      std::cerr << "[line 1] Error: Unexpected character: " << c << std::endl;
+      std::cerr << "[line "<<N<<"] Error: Unexpected character: " << c << std::endl;
       hadError = true;
       break;
     }
