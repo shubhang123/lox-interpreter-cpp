@@ -64,6 +64,9 @@ void tokenize(const std::string& input) {
                 std::cout << "LEFT_BRACE { null"<< std::endl;
                 break;
             case '}':
+                std::cout << "RIGHT_BRACE } null"<< std::endl;
+                break;
+            case '*':
                 std::cout << "STAR * null"<< std::endl;
                 break;
             case '.':
