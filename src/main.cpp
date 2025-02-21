@@ -1,11 +1,11 @@
-#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
 
+// Forward declarations
 std::string readFileContents(const std::string& filename);
-void tokenize(const std::string& input);
+bool tokenize(const std::string& input);
 void printUsageAndExit(const std::string& programName);
 
 int main(int argc, char* argv[]) {
@@ -27,17 +27,25 @@ int main(int argc, char* argv[]) {
 
     if (command == "tokenize") {
         std::string fileContents = readFileContents(filename);
-        tokenize(fileContents);
+        
+        // tokenize returns `true` if any errors were encountered
+        bool hadError = tokenize(fileContents);
+
+        // If lexical errors were present, exit with code 65
+        if (hadError) {
+            return 65;
+        }
     } else {
         std::cerr << "Unknown command: " << command << std::endl;
         printUsageAndExit(argv[0]);
         return 1;
     }
 
+    // If no errors, exit with code 0
     return 0;
 }
 
-//Reads the entire content of a file into a single string.
+// Reads the entire content of a file into a single string.
 std::string readFileContents(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -51,7 +59,17 @@ std::string readFileContents(const std::string& filename) {
     return buffer.str();
 }
 
-void tokenize(const std::string& input) {
+/**
+ * Tokenize the input string. 
+ *
+ * Prints valid tokens to stdout and prints errors to stderr in the format:
+ *  [line 1] Error: Unexpected character: <character>
+ * 
+ * Returns true if any lexical errors were encountered, false otherwise.
+ */
+bool tokenize(const std::string& input) {
+    bool hadError = false;
+
     for (char c : input) {
         switch (c) {
             case '(':
@@ -61,37 +79,52 @@ void tokenize(const std::string& input) {
                 std::cout << "RIGHT_PAREN ) null" << std::endl;
                 break;
             case '{':
-                std::cout << "LEFT_BRACE { null"<< std::endl;
+                std::cout << "LEFT_BRACE { null" << std::endl;
                 break;
             case '}':
-                std::cout << "RIGHT_BRACE } null"<< std::endl;
+                std::cout << "RIGHT_BRACE } null" << std::endl;
                 break;
             case '*':
-                std::cout << "STAR * null"<< std::endl;
+                std::cout << "STAR * null" << std::endl;
                 break;
             case '.':
-                std::cout << "DOT . null"<< std::endl;
+                std::cout << "DOT . null" << std::endl;
                 break;
             case '+':
-                std::cout << "PLUS + null"<< std::endl;
+                std::cout << "PLUS + null" << std::endl;
                 break;
             case ',':
-                std::cout << "COMMA , null"<< std::endl;
+                std::cout << "COMMA , null" << std::endl;
                 break;
             case '-':
-                std::cout << "MINUS - null"<< std::endl;
+                std::cout << "MINUS - null" << std::endl;
                 break;
             case ';':
-                std::cout << "SEMICOLON ; null"<< std::endl;
+                std::cout << "SEMICOLON ; null" << std::endl;
                 break;
+
+            // Ignore common whitespace so it doesn't produce an error.
+            // (In later stages, you might handle newlines to track line numbers properly.)
+            case ' ':
+            case '\t':
+            case '\r':
+            case '\n':
+                break;
+
             default:
+                std::cerr << "[line 1] Error: Unexpected character: " << c << std::endl;
+                hadError = true;
                 break;
         }
     }
+
+    // Finally, print an EOF token
     std::cout << "EOF  null" << std::endl;
+
+    return hadError;
 }
 
-//Prints usage information and exits the program.
+// Prints usage information and exits the program.
 void printUsageAndExit(const std::string& programName) {
     std::cerr << "Usage: " << programName << " tokenize <filename>" << std::endl;
     std::exit(1);
