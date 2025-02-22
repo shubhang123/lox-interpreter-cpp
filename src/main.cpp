@@ -2,47 +2,13 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-
-// Forward declarations.
-std::string readFileContents(const std::string &filename);
-bool tokenize(const std::string &input);
-void printUsageAndExit(const std::string &programName);
-void addToken(const std::string &type, const std::string &lexeme);
-
-int main(int argc, char *argv[])
-{
-    // Disable output buffering.
-    std::cout << std::unitbuf;
-    std::cerr << std::unitbuf;
-
-    std::cerr << "Logs from your program will appear here!" << std::endl;
-
-    if (argc < 3)
-    {
-        printUsageAndExit(argv[0]);
-    }
-
-    const std::string command = argv[1];
-    const std::string filename = argv[2];
-
-    if (command != "tokenize")
-    {
-        std::cerr << "Unknown command: " << command << std::endl;
-        printUsageAndExit(argv[0]);
-    }
-
-    std::string fileContents = readFileContents(filename);
-    bool hadError = tokenize(fileContents);
-
-    return hadError ? 65 : 0;
-}
+#include <cctype>   // for isdigit()
+#include <cstdlib>  // for std::exit()
 
 // Reads the entire content of a file into a single string.
-std::string readFileContents(const std::string &filename)
-{
+std::string readFileContents(const std::string &filename) {
     std::ifstream file(filename);
-    if (!file.is_open())
-    {
+    if (!file.is_open()) {
         std::cerr << "Error reading file: " << filename << std::endl;
         std::exit(1);
     }
@@ -51,177 +17,186 @@ std::string readFileContents(const std::string &filename)
     return buffer.str();
 }
 
-// Helper to add tokens.
-void addToken(const std::string &type, const std::string &lexeme)
-{
-    std::cout << type << " " << lexeme << " null" << std::endl;
+void printUsageAndExit(const std::string &programName) {
+    std::cerr << "Usage: " << programName << " tokenize <filename>" << std::endl;
+    std::exit(1);
 }
 
-void addToken(const std::string &type, const std::string &lexeme, const std::string &literal)
-{
-    std::cout << type << " " << lexeme << " " << literal << std::endl;
-}
+// The Scanner class encapsulates all tokenization logic.
+class Scanner {
+public:
+    Scanner(const std::string &source)
+        : source(source), start(0), current(0), line(1), hadError(false) {}
 
-/**
- * Tokenize the input string.
- *
- * This function prints valid tokens to stdout and lexical errors to stderr.
- * It handles two-character tokens (like ==, !=, <=, >=) using a helper lambda,
- * supports the division operator (/), and ignores single-line comments (//).
- * The function also tracks line numbers, starting at 1.
- *
- * Returns true if any lexical errors were encountered.
- */
-bool tokenize(const std::string &input)
-{
-    bool hadError = false;
-    int inputSize = input.length();
-    int line = 1; // Start line numbers at 1.
-
-    // Lambda to check for a two-character operator.
-    auto match = [&](int &index, char expected) -> bool
-    {
-        if (index + 1 < inputSize && input[index + 1] == expected)
-        {
-            index++; // Consume the next character.
-            return true;
+    // Scans tokens from the source and prints them.
+    // Returns true if any lexical errors were encountered.
+    bool scanTokens() {
+        while (!isAtEnd()) {
+            start = current;
+            scanToken();
         }
-        return false;
-    };
+        addToken("EOF", "");
+        return hadError;
+    }
 
-    for (int index = 0; index < inputSize; index++)
-    {
-        char c = input[index];
-        switch (c)
-        {
-        case '(':
-            addToken("LEFT_PAREN", "(");
-            break;
-        case ')':
-            addToken("RIGHT_PAREN", ")");
-            break;
-        case '{':
-            addToken("LEFT_BRACE", "{");
-            break;
-        case '}':
-            addToken("RIGHT_BRACE", "}");
-            break;
-        case '*':
-            addToken("STAR", "*");
-            break;
-        case '.':
-            addToken("DOT", ".");
-            break;
-        case '+':
-            addToken("PLUS", "+");
-            break;
-        case ',':
-            addToken("COMMA", ",");
-            break;
-        case '-':
-            addToken("MINUS", "-");
-            break;
-        case ';':
-            addToken("SEMICOLON", ";");
-            break;
-        case '=':
-            if (match(index, '='))
-            {
-                addToken("EQUAL_EQUAL", "==");
-            }
-            else
-            {
-                addToken("EQUAL", "=");
-            }
-            break;
-        case '!':
-            if (match(index, '='))
-            {
-                addToken("BANG_EQUAL", "!=");
-            }
-            else
-            {
-                addToken("BANG", "!");
-            }
-            break;
-        case '<':
-            if (match(index, '='))
-            {
-                addToken("LESS_EQUAL", "<=");
-            }
-            else
-            {
-                addToken("LESS", "<");
-            }
-            break;
-        case '>':
-            if (match(index, '='))
-            {
-                addToken("GREATER_EQUAL", ">=");
-            }
-            else
-            {
-                addToken("GREATER", ">");
-            }
-            break;
-        case '/':
-            if (match(index, '/'))
-            {
-                // Single-line comment: skip until newline or end-of-file.
-                while (index + 1 < inputSize && input[index + 1] != '\n')
-                {
-                    index++;
-                }
-            }
-            else
-            {
-                addToken("SLASH", "/");
-            }
-            break;
-            case '"': {  // String literal processing
-                std::string literal = "";
-                index++; // Move past the opening quote
-          
-                while (index < inputSize && input[index] != '"') {
-                  if (input[index] == '\n') {
-                    line++;  // Handle multi-line strings
-                  }
-                  literal.push_back(input[index]);
-                  index++;
-                }
-    
-                if (index >= inputSize) {
-                  std::cerr << "[line " << line << "] Error: Unterminated string." << std::endl;
-                  hadError = true;
+private:
+    const std::string source;
+    int start;
+    int current;
+    int line;
+    bool hadError;
+
+    // Returns true if we've reached the end of the source.
+    bool isAtEnd() const {
+        return current >= static_cast<int>(source.length());
+    }
+
+    // Consumes and returns the current character.
+    char advance() {
+        return source[current++];
+    }
+
+    // Returns the current character without consuming it.
+    char peek() const {
+        if (isAtEnd()) return '\0';
+        return source[current];
+    }
+
+    // Returns the next character after the current one.
+    char peekNext() const {
+        if (current + 1 >= source.length()) return '\0';
+        return source[current + 1];
+    }
+
+    // Checks if the next character matches 'expected' and consumes it if so.
+    bool match(char expected) {
+        if (isAtEnd() || source[current] != expected) return false;
+        current++;
+        return true;
+    }
+
+    // Scans a single token.
+    void scanToken() {
+        char c = advance();
+        switch (c) {
+            case '(': addToken("LEFT_PAREN", "("); break;
+            case ')': addToken("RIGHT_PAREN", ")"); break;
+            case '{': addToken("LEFT_BRACE", "{"); break;
+            case '}': addToken("RIGHT_BRACE", "}"); break;
+            case '*': addToken("STAR", "*"); break;
+            case '.': addToken("DOT", "."); break;
+            case '+': addToken("PLUS", "+"); break;
+            case ',': addToken("COMMA", ","); break;
+            case '-': addToken("MINUS", "-"); break;
+            case ';': addToken("SEMICOLON", ";"); break;
+            case '!':
+                addToken(match('=') ? "BANG_EQUAL" : "BANG", match('=') ? "!=" : "!");
+                break;
+            case '=':
+                addToken(match('=') ? "EQUAL_EQUAL" : "EQUAL", match('=') ? "==" : "=");
+                break;
+            case '<':
+                addToken(match('=') ? "LESS_EQUAL" : "LESS", match('=') ? "<=" : "<");
+                break;
+            case '>':
+                addToken(match('=') ? "GREATER_EQUAL" : "GREATER", match('=') ? ">=" : ">");
+                break;
+            case '/':
+                if (match('/')) {
+                    // Skip single-line comment.
+                    while (peek() != '\n' && !isAtEnd()) {
+                        advance();
+                    }
                 } else {
-                  addToken("STRING", "\"" + literal + "\"", literal);
+                    addToken("SLASH", "/");
                 }
                 break;
-              }
-        // Ignore whitespace (but update line number on newline).
-        case ' ':
-        case '\t':
-        case '\r':
-            break;
-        case '\n':
-            line++;
-            break;
-        default:
-            std::cerr << "[line " << line << "] Error: Unexpected character: " << c
-                      << std::endl;
-            hadError = true;
-            break;
+            case '"': scanString(); break;
+            case ' ':
+            case '\r':
+            case '\t':
+                // Ignore whitespace.
+                break;
+            case '\n':
+                line++;
+                break;
+            default:
+                if (std::isdigit(c)) {
+                    scanNumber();
+                } else {
+                    std::cerr << "[line " << line << "] Error: Unexpected character: " << c << "\n";
+                    hadError = true;
+                }
+                break;
         }
     }
 
-    // Finally, add the EOF token.
-    addToken("EOF", "");
-    return hadError;
-}
+    // Scans a string literal.
+    void scanString() {
+        std::string literal;
+        while (peek() != '"' && !isAtEnd()) {
+            if (peek() == '\n') line++;
+            literal.push_back(advance());
+        }
+        if (isAtEnd()) {
+            std::cerr << "[line " << line << "] Error: Unterminated string.\n";
+            hadError = true;
+            return;
+        }
+        advance(); // Consume the closing '"'
+        std::string lexeme = "\"" + literal + "\"";
+        addToken("STRING", lexeme, literal);
+    }
 
-// Prints usage information and exits the program.
-void printUsageAndExit(const std::string &programName)
-{
-    std::cerr << "Usage: " << programName << " tokenize <filename>" << std::endl;
-    std::exit(1);
+    // Scans a number literal.
+    void scanNumber() {
+        while (std::isdigit(peek())) advance();
+
+        // Look for a fractional part.
+        if (peek() == '.' && std::isdigit(peekNext())) {
+            advance(); // Consume the '.'
+            while (std::isdigit(peek())) advance();
+        }
+
+        std::string lexeme = source.substr(start, current - start);
+        // If the lexeme does not contain a '.', append ".0" as per spec.
+        std::string literal = (lexeme.find('.') == std::string::npos)? lexeme + ".0" : lexeme;
+        addToken("NUMBER", lexeme, literal);
+    }
+
+    // Emits a token without a literal value.
+    void addToken(const std::string &type, const std::string &lexeme) {
+        std::cout << type << " " << lexeme << " null" << std::endl;
+    }
+
+    // Emits a token with a literal value.
+    void addToken(const std::string &type, const std::string &lexeme, const std::string &literal) {
+        std::cout << type << " " << lexeme << " " << literal << std::endl;
+    }
+};
+
+int main(int argc, char *argv[]) {
+    // Disable output buffering.
+    std::cout << std::unitbuf;
+    std::cerr << std::unitbuf;
+
+    std::cerr << "Logs from your program will appear here!" << std::endl;
+
+    if (argc < 3) {
+        printUsageAndExit(argv[0]);
+    }
+
+    const std::string command = argv[1];
+    const std::string filename = argv[2];
+
+    if (command != "tokenize") {
+        std::cerr << "Unknown command: " << command << std::endl;
+        printUsageAndExit(argv[0]);
+    }
+
+    std::string fileContents = readFileContents(filename);
+    Scanner scanner(fileContents);
+    bool hadError = scanner.scanTokens();
+
+    return hadError ? 65 : 0;
 }
