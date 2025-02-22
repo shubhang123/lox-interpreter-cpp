@@ -4,6 +4,7 @@
 #include <string>
 #include <cctype>   // for isdigit()
 #include <cstdlib>  // for std::exit()
+#include<bits/stdc++.h>
 
 // Custom helper functions.
 bool isAlphaOrUnderscore(char c) {
@@ -190,9 +191,33 @@ private:
     }
 
     void scanIdentifier() {
+        std::unordered_map<std::string, std::string> keywords{
+            {"and", "AND"},
+            {"class", "CLASS"},
+            {"else", "ELSE"},
+            {"false", "FALSE"},
+            {"for", "FOR"},
+            {"fun", "FUN"},
+            {"if", "IF"},
+            {"nil", "NIL"},
+            {"or", "OR"},
+            {"print", "PRINT"},
+            {"return", "RETURN"},
+            {"super", "SUPER"},
+            {"this", "THIS"},
+            {"true", "TRUE"},
+            {"var", "VAR"},
+            {"while", "WHILE"}
+        };
+
         while (isAlphaNumOrUnderscore(peek()))
             advance();
         std::string lexeme = source.substr(start, current - start);
+        if (keywords.find(lexeme) != keywords.end()) {
+            auto it = keywords.find(lexeme);
+            addToken(it->second, it->first);
+        }
+        
         addToken("IDENTIFIER", lexeme);
     }
 };
