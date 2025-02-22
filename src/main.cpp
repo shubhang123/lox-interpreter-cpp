@@ -150,19 +150,31 @@ private:
 
     // Scans a number literal.
     void scanNumber() {
-        while (std::isdigit(peek())) advance();
-
-        // Look for a fractional part.
+        // Consume all digits in the integer part.
+        while (std::isdigit(peek()))
+            advance();
+    
+        // Check for a fractional part.
         if (peek() == '.' && std::isdigit(peekNext())) {
             advance(); // Consume the '.'
-            while (std::isdigit(peek())) advance();
+            while (std::isdigit(peek()))
+                advance();
         }
-
+        
         std::string lexeme = source.substr(start, current - start);
-        // If the lexeme does not contain a '.', append ".0" as per spec.
-        std::string literal = (lexeme.find('.') == std::string::npos)? lexeme + ".0" : lexeme;
+        double number = std::stod(lexeme);
+        std::string literal;
+        
+        // If the number is an integer, format it as "number.0".
+        if (number == static_cast<int>(number)) {
+            literal = std::to_string(static_cast<int>(number)) + ".0";
+        } else {
+            literal = lexeme;
+        }
+        
         addToken("NUMBER", lexeme, literal);
     }
+    
 
     // Emits a token without a literal value.
     void addToken(const std::string &type, const std::string &lexeme) {
