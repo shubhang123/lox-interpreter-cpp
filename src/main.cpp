@@ -2,7 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <cctype>   // Optional if you remove std::isalpha, std::isdigit, etc.
+#include <cctype>   // for isdigit()
 #include <cstdlib>  // for std::exit()
 
 // Custom helper functions.
@@ -133,17 +133,14 @@ private:
             case ' ':
             case '\r':
             case '\t':
-                // Ignore whitespace.
                 break;
-            case '\n':
-                line++;
-                break;
+            case '\n': line++; break;
             default:
-                if (std::isdigit(c)) {
+                if (std::isdigit(c))
                     scanNumber();
-                } else if (isAlphaOrUnderscore(c)) {
+                else if (isAlphaOrUnderscore(c))
                     scanIdentifier();
-                } else {
+                else {
                     std::cerr << "[line " << line << "] Error: Unexpected character: " << c << "\n";
                     hadError = true;
                 }
@@ -154,8 +151,7 @@ private:
     void scanString() {
         std::string literal;
         while (peek() != '"' && !isAtEnd()) {
-            if (peek() == '\n')
-                line++;
+            if (peek() == '\n') line++;
             literal.push_back(advance());
         }
         if (isAtEnd()) {
@@ -171,21 +167,25 @@ private:
     void scanNumber() {
         while (std::isdigit(peek()))
             advance();
-
+    
         if (peek() == '.' && std::isdigit(peekNext())) {
             advance(); // Consume '.'
             while (std::isdigit(peek()))
                 advance();
         }
-
+        
         std::string lexeme = source.substr(start, current - start);
         double number = std::stod(lexeme);
         std::string literal;
         if (number == static_cast<int>(number))
             literal = std::to_string(static_cast<int>(number)) + ".0";
-        else
-            literal = lexeme;
-
+        else {
+            // Use a simple stringstream to format the number,
+            // which will trim any unnecessary trailing zeros.
+            std::ostringstream oss;
+            oss << number;
+            literal = oss.str();
+        }
         addToken("NUMBER", lexeme, literal);
     }
 
