@@ -127,7 +127,9 @@ private:
             default:
                 if (std::isdigit(c)) {
                     scanNumber();
-                } else {
+                } else if (c - 'a' < 26 || c == '_'){
+                    scanIdentifier();
+                }else {
                     std::cerr << "[line " << line << "] Error: Unexpected character: " << c << "\n";
                     hadError = true;
                 }
@@ -170,6 +172,12 @@ private:
             literal = lexeme;
         
         addToken("NUMBER", lexeme, literal);
+    }
+
+    void scanIdentifier() {
+        while (std::isalnum(peek()) || peek() == '_') advance();
+        std::string lexeme = source.substr(start, current - start);
+        addToken("IDENTIFIER", lexeme);
     }
 };
 
