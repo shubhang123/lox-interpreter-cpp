@@ -2,8 +2,17 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <cctype>   // for isdigit()
+#include <cctype>   // Optional if you remove std::isalpha, std::isdigit, etc.
 #include <cstdlib>  // for std::exit()
+
+// Custom helper functions.
+bool isAlphaOrUnderscore(char c) {
+    return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_');
+}
+
+bool isAlphaNumOrUnderscore(char c) {
+    return isAlphaOrUnderscore(c) || (c >= '0' && c <= '9');
+}
 
 // Reads the entire content of a file into a single string.
 std::string readFileContents(const std::string &filename) {
@@ -37,7 +46,8 @@ public:
     Scanner(const std::string &source)
         : source(source), start(0), current(0), line(1), hadError(false) {}
 
-    // Scans tokens and prints them. Returns true if any errors occurred.
+    // Scans tokens from the source and prints them.
+    // Returns true if any errors were encountered.
     bool scanTokens() {
         while (!isAtEnd()) {
             start = current;
@@ -112,6 +122,7 @@ private:
             }
             case '/':
                 if (match('/')) {
+                    // Skip single-line comment.
                     while (peek() != '\n' && !isAtEnd())
                         advance();
                 } else {
@@ -122,14 +133,17 @@ private:
             case ' ':
             case '\r':
             case '\t':
+                // Ignore whitespace.
                 break;
-            case '\n': line++; break;
+            case '\n':
+                line++;
+                break;
             default:
                 if (std::isdigit(c)) {
                     scanNumber();
-                } else if (c - 'a' < 26 || c == '_'){
+                } else if (isAlphaOrUnderscore(c)) {
                     scanIdentifier();
-                }else {
+                } else {
                     std::cerr << "[line " << line << "] Error: Unexpected character: " << c << "\n";
                     hadError = true;
                 }
@@ -140,7 +154,8 @@ private:
     void scanString() {
         std::string literal;
         while (peek() != '"' && !isAtEnd()) {
-            if (peek() == '\n') line++;
+            if (peek() == '\n')
+                line++;
             literal.push_back(advance());
         }
         if (isAtEnd()) {
@@ -148,7 +163,7 @@ private:
             hadError = true;
             return;
         }
-        advance(); // Consume closing "
+        advance(); // Consume the closing '"'
         std::string lexeme = "\"" + literal + "\"";
         addToken("STRING", lexeme, literal);
     }
@@ -156,13 +171,13 @@ private:
     void scanNumber() {
         while (std::isdigit(peek()))
             advance();
-    
+
         if (peek() == '.' && std::isdigit(peekNext())) {
             advance(); // Consume '.'
             while (std::isdigit(peek()))
                 advance();
         }
-        
+
         std::string lexeme = source.substr(start, current - start);
         double number = std::stod(lexeme);
         std::string literal;
@@ -170,12 +185,13 @@ private:
             literal = std::to_string(static_cast<int>(number)) + ".0";
         else
             literal = lexeme;
-        
+
         addToken("NUMBER", lexeme, literal);
     }
 
     void scanIdentifier() {
-        while (std::isalnum(peek()) || peek() == '_') advance();
+        while (isAlphaNumOrUnderscore(peek()))
+            advance();
         std::string lexeme = source.substr(start, current - start);
         addToken("IDENTIFIER", lexeme);
     }
