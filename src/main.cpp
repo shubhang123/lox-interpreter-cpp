@@ -216,6 +216,7 @@ private:
         if (keywords.find(lexeme) != keywords.end()) {
             auto it = keywords.find(lexeme);
             addToken(it->second, it->first);
+            return;
         }
         
         addToken("IDENTIFIER", lexeme);
