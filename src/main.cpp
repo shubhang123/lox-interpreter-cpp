@@ -22,14 +22,22 @@ void printUsageAndExit(const std::string &programName) {
     std::exit(1);
 }
 
-// The Scanner class encapsulates all tokenization logic.
+// Simple token printing helpers.
+void addToken(const std::string &type, const std::string &lexeme) {
+    std::cout << type << " " << lexeme << " null" << std::endl;
+}
+
+void addToken(const std::string &type, const std::string &lexeme, const std::string &literal) {
+    std::cout << type << " " << lexeme << " " << literal << std::endl;
+}
+
+// The Scanner class encapsulates tokenization logic.
 class Scanner {
 public:
     Scanner(const std::string &source)
         : source(source), start(0), current(0), line(1), hadError(false) {}
 
-    // Scans tokens from the source and prints them.
-    // Returns true if any lexical errors were encountered.
+    // Scans tokens and prints them. Returns true if any errors occurred.
     bool scanTokens() {
         while (!isAtEnd()) {
             start = current;
@@ -46,36 +54,29 @@ private:
     int line;
     bool hadError;
 
-    // Returns true if we've reached the end of the source.
     bool isAtEnd() const {
         return current >= static_cast<int>(source.length());
     }
 
-    // Consumes and returns the current character.
     char advance() {
         return source[current++];
     }
 
-    // Returns the current character without consuming it.
     char peek() const {
-        if (isAtEnd()) return '\0';
-        return source[current];
+        return isAtEnd() ? '\0' : source[current];
     }
 
-    // Returns the next character after the current one.
     char peekNext() const {
-        if (current + 1 >= source.length()) return '\0';
-        return source[current + 1];
+        return (current + 1 >= static_cast<int>(source.length())) ? '\0' : source[current + 1];
     }
 
-    // Checks if the next character matches 'expected' and consumes it if so.
     bool match(char expected) {
-        if (isAtEnd() || source[current] != expected) return false;
+        if (isAtEnd() || source[current] != expected)
+            return false;
         current++;
         return true;
     }
 
-    // Scans a single token.
     void scanToken() {
         char c = advance();
         switch (c) {
@@ -89,24 +90,30 @@ private:
             case ',': addToken("COMMA", ","); break;
             case '-': addToken("MINUS", "-"); break;
             case ';': addToken("SEMICOLON", ";"); break;
-            case '!':
-                addToken(match('=') ? "BANG_EQUAL" : "BANG", match('=') ? "!=" : "!");
+            case '!': {
+                bool eq = match('=');
+                addToken(eq ? "BANG_EQUAL" : "BANG", eq ? "!=" : "!");
                 break;
-            case '=':
-                addToken(match('=') ? "EQUAL_EQUAL" : "EQUAL", match('=') ? "==" : "=");
+            }
+            case '=': {
+                bool eq = match('=');
+                addToken(eq ? "EQUAL_EQUAL" : "EQUAL", eq ? "==" : "=");
                 break;
-            case '<':
-                addToken(match('=') ? "LESS_EQUAL" : "LESS", match('=') ? "<=" : "<");
+            }
+            case '<': {
+                bool eq = match('=');
+                addToken(eq ? "LESS_EQUAL" : "LESS", eq ? "<=" : "<");
                 break;
-            case '>':
-                addToken(match('=') ? "GREATER_EQUAL" : "GREATER", match('=') ? ">=" : ">");
+            }
+            case '>': {
+                bool eq = match('=');
+                addToken(eq ? "GREATER_EQUAL" : "GREATER", eq ? ">=" : ">");
                 break;
+            }
             case '/':
                 if (match('/')) {
-                    // Skip single-line comment.
-                    while (peek() != '\n' && !isAtEnd()) {
+                    while (peek() != '\n' && !isAtEnd())
                         advance();
-                    }
                 } else {
                     addToken("SLASH", "/");
                 }
@@ -115,11 +122,8 @@ private:
             case ' ':
             case '\r':
             case '\t':
-                // Ignore whitespace.
                 break;
-            case '\n':
-                line++;
-                break;
+            case '\n': line++; break;
             default:
                 if (std::isdigit(c)) {
                     scanNumber();
@@ -131,7 +135,6 @@ private:
         }
     }
 
-    // Scans a string literal.
     void scanString() {
         std::string literal;
         while (peek() != '"' && !isAtEnd()) {
@@ -143,20 +146,17 @@ private:
             hadError = true;
             return;
         }
-        advance(); // Consume the closing '"'
+        advance(); // Consume closing "
         std::string lexeme = "\"" + literal + "\"";
         addToken("STRING", lexeme, literal);
     }
 
-    // Scans a number literal.
     void scanNumber() {
-        // Consume all digits in the integer part.
         while (std::isdigit(peek()))
             advance();
     
-        // Check for a fractional part.
         if (peek() == '.' && std::isdigit(peekNext())) {
-            advance(); // Consume the '.'
+            advance(); // Consume '.'
             while (std::isdigit(peek()))
                 advance();
         }
@@ -164,39 +164,23 @@ private:
         std::string lexeme = source.substr(start, current - start);
         double number = std::stod(lexeme);
         std::string literal;
-        
-        // If the number is an integer, format it as "number.0".
-        if (number == static_cast<int>(number)) {
+        if (number == static_cast<int>(number))
             literal = std::to_string(static_cast<int>(number)) + ".0";
-        } else {
+        else
             literal = lexeme;
-        }
         
         addToken("NUMBER", lexeme, literal);
-    }
-    
-
-    // Emits a token without a literal value.
-    void addToken(const std::string &type, const std::string &lexeme) {
-        std::cout << type << " " << lexeme << " null" << std::endl;
-    }
-
-    // Emits a token with a literal value.
-    void addToken(const std::string &type, const std::string &lexeme, const std::string &literal) {
-        std::cout << type << " " << lexeme << " " << literal << std::endl;
     }
 };
 
 int main(int argc, char *argv[]) {
-    // Disable output buffering.
     std::cout << std::unitbuf;
     std::cerr << std::unitbuf;
 
     std::cerr << "Logs from your program will appear here!" << std::endl;
 
-    if (argc < 3) {
+    if (argc < 3)
         printUsageAndExit(argv[0]);
-    }
 
     const std::string command = argv[1];
     const std::string filename = argv[2];
