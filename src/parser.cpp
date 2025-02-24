@@ -24,6 +24,7 @@ void Parser::parse(std::vector<Token>& tokens) {
             case TOKEN_NUMBER:
                 // Print the literal value for numbers.
                     std::cout << token.literal << std::endl;
+            break;
             case TOKEN_STRING:
                 std::cout<< token.literal << std::endl;
             break;
