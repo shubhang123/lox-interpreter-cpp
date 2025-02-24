@@ -4,6 +4,7 @@
 #include <string>
 #include "../include/scanner.h"
 #include "../include/parser.h"
+#include "../include/utils.h"
 
 // Helper function: Reads the entire file into a string.
 std::string readFileContents(const std::string &filename) {
