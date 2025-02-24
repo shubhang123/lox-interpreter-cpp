@@ -6,7 +6,7 @@
 
 class Parser {
 public:
-    // The parse function takes a vector of tokens and processes them.
+    // The parse function processes a vector of tokens.
     void parse(std::vector<Token>& tokens);
 
 private:

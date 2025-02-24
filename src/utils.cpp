@@ -6,7 +6,7 @@
 
 std::string readFileContents(const std::string &filename) {
     std::ifstream file(filename);
-    if (!file.is_open()){
+    if (!file) {
         std::cerr << "Error reading file: " << filename << std::endl;
         std::exit(1);
     }
@@ -18,8 +18,4 @@ std::string readFileContents(const std::string &filename) {
 void printUsageAndExit(const std::string &programName) {
     std::cerr << "Usage: " << programName << " tokenize|parse <filename>" << std::endl;
     std::exit(1);
-}
-
-void addToken(const std::string &type, const std::string &lexeme, const std::string &literal) {
-    std::cout << type << " " << lexeme << " " << literal << std::endl;
 }

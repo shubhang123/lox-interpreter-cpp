@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include "../include/token.h"
-
 class Scanner {
 public:
     Scanner(const std::string &source);
@@ -24,7 +23,7 @@ private:
     char peekNext() const;
     bool match(char expected);
 
-    // Instead of printing, add tokens to our vector.
+    // Adds a token to the tokens vector.
     void addToken(TokenType type, const std::string &lexeme, const std::string &literal = "null");
 
     void scanToken();

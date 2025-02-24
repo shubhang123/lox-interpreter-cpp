@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <string>
 #include "../include/scanner.h"
 #include "../include/parser.h"
@@ -17,9 +16,11 @@ int main(int argc, char *argv[]) {
     if (command == "tokenize") {
         Scanner scanner(fileContents);
         auto tokens = scanner.scanTokens();
-        // Print each token's lexeme, type, and literal.
+        // For each token, print token type, lexeme, and literal.
         for (const auto &token : tokens) {
-            std::cout << token.lexeme << " " << token.literal << std::endl;
+            std::cout << tokenTypeToString(token.type) << " "
+                      << token.lexeme << " "
+                      << token.literal << std::endl;
         }
     } else if (command == "parse") {
         Scanner scanner(fileContents);

@@ -1,6 +1,5 @@
 #include "../include/scanner.h"
 #include "../include/token.h"
-#include "../include/utils.h"
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
