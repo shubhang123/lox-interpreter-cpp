@@ -10,4 +10,6 @@ add_executable(interpreter ${SOURCE_FILES}
         src/scanner.cpp
         src/include/scanner.h
         src/include/utils.h
-        src/utils.cpp)
+        src/utils.cpp
+        src/include/parser.h
+        src/parser.cpp)

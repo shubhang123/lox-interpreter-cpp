@@ -1,32 +1,35 @@
 #include <iostream>
-#include "include/scanner.h"
-#include "include/utils.h"
-
-void printUsageAndExit(const std::string &programName) {
-    std::cerr << "Usage: " << programName << " tokenize <filename>" << std::endl;
-    std::exit(1);
-}
+#include "utils.h"
+#include "scanner.h"
+#include "parser.h"
 
 int main(int argc, char *argv[]) {
     std::cout << std::unitbuf;
     std::cerr << std::unitbuf;
 
-    std::cerr << "Logs from your program will appear here!" << std::endl;
-
     if (argc < 3)
         printUsageAndExit(argv[0]);
 
-    const std::string command = argv[1];
-    const std::string filename = argv[2];
+    std::string command = argv[1];
+    std::string filename = argv[2];
+    std::string fileContents = readFileContents(filename);
 
-    if (command != "tokenize") {
+    if (command == "tokenize") {
+        Scanner scanner(fileContents);
+        bool hadError = scanner.scanTokens();
+        return hadError ? 65 : 0;
+    } else if (command == "parse") {
+        std::vector<PToken> tokens = scanTokensForParser(fileContents);
+        Parser parser(tokens);
+        Expr *expression = parser.parse();
+        if (expression) {
+            std::cout << expression->print() << "\n";
+            delete expression;
+        }
+        return 0;
+    } else {
         std::cerr << "Unknown command: " << command << std::endl;
         printUsageAndExit(argv[0]);
     }
-
-    std::string fileContents = readFileContents(filename);
-    Scanner scanner(fileContents);
-    bool hadError = scanner.scanTokens();
-
-    return hadError ? 65 : 0;
+    return 0;
 }

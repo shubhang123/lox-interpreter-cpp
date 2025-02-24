@@ -55,6 +55,12 @@ build CMakeFiles/interpreter.dir/src/main.cpp.o: CXX_COMPILER__interpreter_unsca
   OBJECT_DIR = CMakeFiles/interpreter.dir
   OBJECT_FILE_DIR = CMakeFiles/interpreter.dir/src
 
+build CMakeFiles/interpreter.dir/src/parser.cpp.o: CXX_COMPILER__interpreter_unscanned_Debug /home/shubhang/Documents/C++/codecrafters-interpreter-cpp/src/parser.cpp || cmake_object_order_depends_target_interpreter
+  DEP_FILE = CMakeFiles/interpreter.dir/src/parser.cpp.o.d
+  FLAGS = -g -std=gnu++23 -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles/interpreter.dir
+  OBJECT_FILE_DIR = CMakeFiles/interpreter.dir/src
+
 build CMakeFiles/interpreter.dir/src/scanner.cpp.o: CXX_COMPILER__interpreter_unscanned_Debug /home/shubhang/Documents/C++/codecrafters-interpreter-cpp/src/scanner.cpp || cmake_object_order_depends_target_interpreter
   DEP_FILE = CMakeFiles/interpreter.dir/src/scanner.cpp.o.d
   FLAGS = -g -std=gnu++23 -fdiagnostics-color=always
@@ -75,7 +81,7 @@ build CMakeFiles/interpreter.dir/src/utils.cpp.o: CXX_COMPILER__interpreter_unsc
 #############################################
 # Link the executable interpreter
 
-build interpreter: CXX_EXECUTABLE_LINKER__interpreter_Debug CMakeFiles/interpreter.dir/src/main.cpp.o CMakeFiles/interpreter.dir/src/scanner.cpp.o CMakeFiles/interpreter.dir/src/utils.cpp.o
+build interpreter: CXX_EXECUTABLE_LINKER__interpreter_Debug CMakeFiles/interpreter.dir/src/main.cpp.o CMakeFiles/interpreter.dir/src/parser.cpp.o CMakeFiles/interpreter.dir/src/scanner.cpp.o CMakeFiles/interpreter.dir/src/utils.cpp.o
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/interpreter.dir
   POST_BUILD = :
