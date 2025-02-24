@@ -22,7 +22,7 @@ void Parser::parse(std::vector<Token>& tokens) {
                 std::cout << "nil" << std::endl;
             break;
             case TOKEN_NUMBER:
-                std::cout << token.lexeme << std::endl;
+                std::cout << token.literal << std::endl;
             break;
             default:
                 // For other tokens, you might extend parsing logic.
