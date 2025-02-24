@@ -9,6 +9,8 @@ public:
     Scanner(const std::string &source);
     // Scans tokens and returns them as a vector.
     std::vector<Token> scanTokens();
+    bool hadErrorOccurred() const { return hadError; }
+
 
 private:
     const std::string source;
