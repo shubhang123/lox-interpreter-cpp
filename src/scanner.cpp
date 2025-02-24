@@ -26,6 +26,9 @@ std::vector<Token> Scanner::scanTokens() {
         scanToken();
     }
     addToken(TOKEN_EOF, "", "null");
+    if (hadError) {
+        std::exit(65);
+    }
     return tokens;
 }
 
