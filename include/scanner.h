@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "../token/token.hpp"
+#include "../include/token.h"
 
 class Scanner {
 public:

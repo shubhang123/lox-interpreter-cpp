@@ -2,7 +2,7 @@
 #define PARSER_HPP
 
 #include <vector>
-#include "../token/token.hpp"
+#include "../include/token.h"
 
 class Parser {
 public:
