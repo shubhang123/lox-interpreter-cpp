@@ -1,5 +1,6 @@
-#include "include/scanner.h"
-#include "include/utils.h"
+#include "../include/scanner.h"
+#include "../include/token.h"
+#include "../include/utils.h"
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
@@ -20,13 +21,13 @@ static bool isAlphaNumOrUnderscore(char c) {
 Scanner::Scanner(const std::string &source)
     : source(source), start(0), current(0), line(1), hadError(false) {}
 
-bool Scanner::scanTokens() {
+std::vector<Token> Scanner::scanTokens() {
     while (!isAtEnd()) {
         start = current;
         scanToken();
     }
-    addToken("EOF", "", "null");
-    return hadError;
+    addToken(TOKEN_EOF, "", "null");
+    return tokens;
 }
 
 bool Scanner::isAtEnd() const {
@@ -52,37 +53,41 @@ bool Scanner::match(char expected) {
     return true;
 }
 
+void Scanner::addToken(TokenType type, const std::string &lexeme, const std::string &literal) {
+    tokens.push_back({type, lexeme, literal, line});
+}
+
 void Scanner::scanToken() {
     char c = advance();
     switch (c) {
-        case '(': addToken("LEFT_PAREN", "("); break;
-        case ')': addToken("RIGHT_PAREN", ")"); break;
-        case '{': addToken("LEFT_BRACE", "{"); break;
-        case '}': addToken("RIGHT_BRACE", "}"); break;
-        case '*': addToken("STAR", "*"); break;
-        case '.': addToken("DOT", "."); break;
-        case '+': addToken("PLUS", "+"); break;
-        case ',': addToken("COMMA", ","); break;
-        case '-': addToken("MINUS", "-"); break;
-        case ';': addToken("SEMICOLON", ";"); break;
+        case '(': addToken(TOKEN_LEFT_PAREN, "("); break;
+        case ')': addToken(TOKEN_RIGHT_PAREN, ")"); break;
+        case '{': addToken(TOKEN_LEFT_BRACE, "{"); break;
+        case '}': addToken(TOKEN_RIGHT_BRACE, "}"); break;
+        case '*': addToken(TOKEN_STAR, "*"); break;
+        case '.': addToken(TOKEN_DOT, "."); break;
+        case '+': addToken(TOKEN_PLUS, "+"); break;
+        case ',': addToken(TOKEN_COMMA, ","); break;
+        case '-': addToken(TOKEN_MINUS, "-"); break;
+        case ';': addToken(TOKEN_SEMICOLON, ";"); break;
         case '!': {
             bool eq = match('=');
-            addToken(eq ? "BANG_EQUAL" : "BANG", eq ? "!=" : "!");
+            addToken(eq ? TOKEN_BANG_EQUAL : TOKEN_BANG, eq ? "!=" : "!");
             break;
         }
         case '=': {
             bool eq = match('=');
-            addToken(eq ? "EQUAL_EQUAL" : "EQUAL", eq ? "==" : "=");
+            addToken(eq ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL, eq ? "==" : "=");
             break;
         }
         case '<': {
             bool eq = match('=');
-            addToken(eq ? "LESS_EQUAL" : "LESS", eq ? "<=" : "<");
+            addToken(eq ? TOKEN_LESS_EQUAL : TOKEN_LESS, eq ? "<=" : "<");
             break;
         }
         case '>': {
             bool eq = match('=');
-            addToken(eq ? "GREATER_EQUAL" : "GREATER", eq ? ">=" : ">");
+            addToken(eq ? TOKEN_GREATER_EQUAL : TOKEN_GREATER, eq ? ">=" : ">");
             break;
         }
         case '/':
@@ -91,7 +96,7 @@ void Scanner::scanToken() {
                 while (peek() != '\n' && !isAtEnd())
                     advance();
             } else {
-                addToken("SLASH", "/", "null");
+                addToken(TOKEN_SLASH, "/", "null");
             }
             break;
         case '"': scanString(); break;
@@ -126,7 +131,7 @@ void Scanner::scanString() {
     }
     advance(); // Consume closing '"'
     std::string lexeme = "\"" + literal + "\"";
-    addToken("STRING", lexeme, literal);
+    addToken(TOKEN_STRING, lexeme, literal);
 }
 
 void Scanner::scanNumber() {
@@ -149,27 +154,27 @@ void Scanner::scanNumber() {
         oss << number;
         literal = oss.str();
     }
-    addToken("NUMBER", lexeme, literal);
+    addToken(TOKEN_NUMBER, lexeme, literal);
 }
 
 void Scanner::scanIdentifier() {
-    std::unordered_map<std::string, std::string> keywords{
-        {"and", "AND"},
-        {"class", "CLASS"},
-        {"else", "ELSE"},
-        {"false", "FALSE"},
-        {"for", "FOR"},
-        {"fun", "FUN"},
-        {"if", "IF"},
-        {"nil", "NIL"},
-        {"or", "OR"},
-        {"print", "PRINT"},
-        {"return", "RETURN"},
-        {"super", "SUPER"},
-        {"this", "THIS"},
-        {"true", "TRUE"},
-        {"var", "VAR"},
-        {"while", "WHILE"}
+    std::unordered_map<std::string, TokenType> keywords{
+        {"and", TOKEN_AND},
+        {"class", TOKEN_CLASS},
+        {"else", TOKEN_ELSE},
+        {"false", TOKEN_FALSE},
+        {"for", TOKEN_FOR},
+        {"fun", TOKEN_FUN},
+        {"if", TOKEN_IF},
+        {"nil", TOKEN_NIL},
+        {"or", TOKEN_OR},
+        {"print", TOKEN_PRINT},
+        {"return", TOKEN_RETURN},
+        {"super", TOKEN_SUPER},
+        {"this", TOKEN_THIS},
+        {"true", TOKEN_TRUE},
+        {"var", TOKEN_VAR},
+        {"while", TOKEN_WHILE}
     };
 
     while (isAlphaNumOrUnderscore(peek()))
@@ -178,6 +183,6 @@ void Scanner::scanIdentifier() {
     if (keywords.find(lexeme) != keywords.end()) {
         addToken(keywords[lexeme], lexeme, "null");
     } else {
-        addToken("IDENTIFIER", lexeme, "null");
+        addToken(TOKEN_IDENTIFIER, lexeme, "null");
     }
 }

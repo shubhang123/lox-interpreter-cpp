@@ -1,13 +1,15 @@
-#ifndef SCANNER_H
-#define SCANNER_H
+#ifndef SCANNER_HPP
+#define SCANNER_HPP
 
 #include <string>
+#include <vector>
+#include "../token/token.hpp"
 
 class Scanner {
 public:
     Scanner(const std::string &source);
-    // Tokenize the input and print tokens.
-    bool scanTokens();
+    // Scans tokens and returns them as a vector.
+    std::vector<Token> scanTokens();
 
 private:
     const std::string source;
@@ -22,10 +24,15 @@ private:
     char peekNext() const;
     bool match(char expected);
 
+    // Instead of printing, add tokens to our vector.
+    void addToken(TokenType type, const std::string &lexeme, const std::string &literal = "null");
+
     void scanToken();
     void scanString();
     void scanNumber();
     void scanIdentifier();
+
+    std::vector<Token> tokens;
 };
 
-#endif // SCANNER_H
+#endif // SCANNER_HPP

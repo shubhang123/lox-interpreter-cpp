@@ -97,7 +97,8 @@
 			[
 				4,
 				5,
-				6
+				6,
+				7
 			]
 		}
 	],
@@ -129,17 +130,22 @@
 		},
 		{
 			"backtrace" : 1,
-			"path" : "src/include/scanner.h",
+			"path" : "include/scanner.h",
 			"sourceGroupIndex" : 1
 		},
 		{
 			"backtrace" : 1,
-			"path" : "src/include/utils.h",
+			"path" : "include/utils.h",
 			"sourceGroupIndex" : 1
 		},
 		{
 			"backtrace" : 1,
-			"path" : "src/include/parser.h",
+			"path" : "include/parser.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "include/token.h",
 			"sourceGroupIndex" : 1
 		}
 	],
