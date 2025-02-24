@@ -23,6 +23,7 @@ enum TokenType {
     TOKEN_LESS_EQUAL,
     TOKEN_GREATER,
     TOKEN_GREATER_EQUAL,
+    TOKEN_SLASH,
 
     // Literals
     TOKEN_IDENTIFIER,
