@@ -1,7 +1,7 @@
 #include <iostream>
-#include "utils.h"
-#include "scanner.h"
-#include "parser.h"
+#include "include/utils.h"
+#include "include/scanner.h"
+#include "include/parser.h"
 
 int main(int argc, char *argv[]) {
     std::cout << std::unitbuf;
