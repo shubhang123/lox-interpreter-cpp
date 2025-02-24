@@ -1,6 +1,6 @@
 #include <iostream>
-#include "scanner.h"
-#include "utils.h"
+#include "include/scanner.h"
+#include "include/utils.h"
 
 void printUsageAndExit(const std::string &programName) {
     std::cerr << "Usage: " << programName << " tokenize <filename>" << std::endl;

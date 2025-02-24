@@ -1,6 +1,5 @@
-#include "scanner.h"
-#include "utils.h"
-
+#include "include/scanner.h"
+#include "include/utils.h"
 Scanner::Scanner(const std::string &source)
     : source(source), start(0), current(0), line(1), hadError(false) {}
 
